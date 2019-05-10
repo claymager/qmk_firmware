@@ -7,7 +7,7 @@ NO_REPEAT				 = no
 VERBOSE					 = yes
 KEYBOARD_SHARED_EP       = yes
 CUSTOM_MATRIX			 = yes
-STENO_LAYERS			 = no
+STENO_LAYERS			 = yes
 
 #Firmware reduction options
 MOUSEKEY_ENABLE			 = yes 		# 1500 bytes
@@ -39,4 +39,7 @@ ifeq ($(strip $(ONLY_QWERTY)), yes)
 endif
 ifeq ($(strip $(NO_TAPPING)), yes)
     OPT_DEFS += -DNO_ACTION_TAPPING
+endif
+ifeq ($(strip $(STENO_LAYERS)), yes)
+    OPT_DEFS += -DSTENOLAYERS
 endif

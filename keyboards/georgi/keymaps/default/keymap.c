@@ -19,6 +19,14 @@
 #define MEDIA   (LSD | LK | LW | LR)
 #define MOVE    (ST1 | ST2)
 
+// Keys and chords that, once they appear, are added to every subsequent partial chord
+// until the whole thing is sent.
+//
+// It is HIGHLY recommended that these are simple (PWR, RNO) or unnatural (MEDIA).
+// If you won't use different commands from the same layer in quick succession,
+// don't add them here.
+uint32_t stenoLayers[] = { PWR, RNO, MEDIA };
+
 // QMK Layers
 #define STENO_LAYER   0
 #define GAMING        1
@@ -36,10 +44,10 @@
  */
 
 // Note: You can only use basic keycodes here!
+//
 // P() is just a wrapper to make your life easier.
 // PC() applies the mapping to all of the StenoLayers.
 //   To overload, declare it with P() first.
-//   Be sure to enable in rules.mk and see colemak-dh for usage 
 //
 // FN is unavailable. That is reserved for system use.
 // Chords containing PWR are always available, even in steno mode.
@@ -142,26 +150,26 @@ uint32_t processQwerty(bool lookup) {
     // Symbols and Numbers
  	P( PWR | RE | RU,      SEND(KC_ENT));
     P( PWR | LA | LO,      SEND(KC_SPC));
-    P( PWR | LP | LW,      SEND(KC_LSFT); SEND(KC_9));       // (
-    P( PWR | LH | LR,      SEND(KC_LSFT); SEND(KC_0));       // )
-    P( PWR | ST1 | ST2,    SEND(KC_GRV));                    // `
+    P( PWR | LP | LW,      SEND_STRING("("));
+    P( PWR | LH | LR,      SEND_STRING(")"));
+    P( PWR | ST1 | ST2,    SEND(KC_GRV));
     P( PWR | RD | RZ,      SEND(KC_ESC));
-    P( PWR | LSU | LSD,    SEND(KC_LSFT); SEND(KC_3));       // #
-    P( PWR | LFT | LK,     SEND(KC_LSFT); SEND(KC_4));       // $
-    P( PWR | LSU,          SEND(KC_LSFT); SEND(KC_1));       // !
-    P( PWR | LSD,          SEND(KC_LSFT); SEND(KC_5));       // %
-    P( PWR | LFT,          SEND(KC_LSFT); SEND(KC_2));       // @
-    P( PWR | LK,           SEND(KC_LSFT); SEND(KC_6));       // ^
-    P( PWR | LP,           SEND(KC_LSFT); SEND(KC_LBRC));    // {
+    P( PWR | LSU | LSD,    SEND_STRING("#"));
+    P( PWR | LFT | LK,     SEND_STRING("$"));
+    P( PWR | LSU,          SEND_STRING("!"));
+    P( PWR | LSD,          SEND_STRING("%"));
+    P( PWR | LFT,          SEND_STRING("@"));
+    P( PWR | LK,           SEND_STRING("^"));
+    P( PWR | LP,           SEND_STRING("{"));
     P( PWR | LW,           SEND(KC_LBRC));
-    P( PWR | LH,           SEND(KC_LSFT); SEND(KC_RBRC));    // }
+    P( PWR | LH,           SEND_STRING("}"));
     P( PWR | LR,           SEND(KC_RBRC));
-    P( PWR | ST1,          SEND(KC_LSFT); SEND(KC_BSLS));    // |
-    P( PWR | ST2,          SEND(KC_LSFT); SEND(KC_GRV));     // ~
+    P( PWR | ST1,          SEND_STRING("|"));
+    P( PWR | ST2,          SEND_STRING("~"));
     P( PWR | ST3,          SEND(KC_QUOT));
-    P( PWR | ST4,          SEND(KC_LSFT); SEND(KC_QUOT));    // "
+    P( PWR | ST4,          SEND_STRING("\""));
     P( PWR | RF,           SEND(KC_KP_PLUS));
-    P( PWR | RR,           SEND(KC_LSFT); SEND(KC_7));       // &
+    P( PWR | RR,           SEND_STRING("&"))
     P( PWR | RP,           SEND(KC_MINS));
     P( PWR | RB,           SEND(KC_EQL));
     P( PWR | RL,           SEND(KC_SLSH));
@@ -245,3 +253,4 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 // Don't fuck with this, thanks.
 size_t keymapsCount  = sizeof(keymaps)/sizeof(keymaps[0]);
+size_t stenoLayerCount = sizeof(stenoLayers)/sizeof(stenoLayers[0]);

@@ -137,12 +137,13 @@ steno:
 
 out:
 	cChord = 0;
+	releasedChord = 0;
 	inChord = false;
 	chordIndex = 0;
 	clear_keyboard();
 	repEngaged  = false;
 	for (int i = 0; i < 32; i++)
-		chordState[i] = 0xFFFF;
+		chordState[i] = UINT32_MAX;
 
 	return false;
 }
@@ -150,56 +151,107 @@ out:
 // Update Chord State 
 bool process_steno_user(uint16_t keycode, keyrecord_t *record) { 
 	// Everything happens in here when steno keys come in.
-	// Bail on keyup
-	if (!record->event.pressed) return true;
+
+	// Process arguments into `pressed` and `newKey`
+	bool pressed = record->event.pressed;
+	uint32_t newKey = 0;
+	switch (keycode) {
+			// Mods and stuff
+			case STN_ST1:			newKey = (ST1); break;
+			case STN_ST2:			newKey = (ST2); break;
+			case STN_ST3:			newKey = (ST3); break;
+			case STN_ST4:			newKey = (ST4); break;
+			case STN_FN:			newKey = (FN); break;
+			case STN_PWR:			newKey = (PWR); break;
+			case STN_N1...STN_N6:	newKey = (LNO); break;
+			case STN_N7...STN_NC:	newKey = (RNO); break;
+
+			// All the letter keys
+			case STN_S1:			newKey = (LSU); break;
+			case STN_S2:			newKey = (LSD); break;
+			case STN_TL:			newKey = (LFT); break;
+			case STN_KL:			newKey = (LK); break;
+			case STN_PL:			newKey = (LP); break;
+			case STN_WL:			newKey = (LW); break;
+			case STN_HL:			newKey = (LH); break;
+			case STN_RL:			newKey = (LR); break;
+			case STN_A:				newKey = (LA); break;
+			case STN_O:				newKey = (LO); break;
+			case STN_E:				newKey = (RE); break;
+			case STN_U:				newKey = (RU); break;
+			case STN_FR:			newKey = (RF); break;
+			case STN_RR:			newKey = (RR); break;
+			case STN_PR:			newKey = (RP); break;
+			case STN_BR:			newKey = (RB); break;
+			case STN_LR:			newKey = (RL); break;
+			case STN_GR:			newKey = (RG); break;
+			case STN_TR:			newKey = (RT); break;
+			case STN_SR:			newKey = (RS); break;
+			case STN_DR:			newKey = (RD); break;
+			case STN_ZR:			newKey = (RZ); break;
+	}
+
+	if (!pressed) {
+		if (cMode == QWERTY) releasedChord |= newKey;
+		return true;
+	}
 
 	// Update key repeat timers
 	repTimer = timer_read();
 	inChord  = true;
 
-	// Switch on the press adding to chord
-	bool pr = record->event.pressed;
-	switch (keycode) {
-			// Mods and stuff
-			case STN_ST1:			pr ? (cChord |= (ST1)): (cChord &= ~(ST1)); break;
-			case STN_ST2:			pr ? (cChord |= (ST2)): (cChord &= ~(ST2)); break;
-			case STN_ST3:			pr ? (cChord |= (ST3)): (cChord &= ~(ST3)); break;
-			case STN_ST4:			pr ? (cChord |= (ST4)): (cChord &= ~(ST4)); break;
-			case STN_FN:			pr ? (cChord |= (FN)) : (cChord &= ~(FN)); break;
-			case STN_PWR:			pr ? (cChord |= (PWR)): (cChord &= ~(PWR)); break;
-			case STN_N1...STN_N6:	pr ? (cChord |= (LNO)): (cChord &= ~(LNO)); break;
-			case STN_N7...STN_NC:	pr ? (cChord |= (RNO)): (cChord &= ~(RNO)); break;
+	// If a key is pressed twice in the same (QWERTY) chord, assume intentional.
+	// Send the current state of the chord and reset.
+	if (cMode == QWERTY && cChord & newKey && !(cChord & FN)) {
 
-			// All the letter keys
-			case STN_S1:			pr ? (cChord |= (LSU)) : (cChord &= ~(LSU));  break;
-			case STN_S2:			pr ? (cChord |= (LSD)) : (cChord &= ~(LSD));  break;
-			case STN_TL:			pr ? (cChord |= (LFT)) : (cChord &= ~(LFT)); break;
-			case STN_KL:			pr ? (cChord |= (LK)) : (cChord &= ~(LK)); break;
-			case STN_PL:			pr ? (cChord |= (LP)) : (cChord &= ~(LP)); break;
-			case STN_WL:			pr ? (cChord |= (LW)) : (cChord &= ~(LW)); break;
-			case STN_HL:			pr ? (cChord |= (LH)) : (cChord &= ~(LH)); break;
-			case STN_RL:			pr ? (cChord |= (LR)) : (cChord &= ~(LR)); break;
-			case STN_A:				pr ? (cChord |= (LA)) : (cChord &= ~(LA)); break;
-			case STN_O:				pr ? (cChord |= (LO)) : (cChord &= ~(LO)); break;
-			case STN_E:				pr ? (cChord |= (RE)) : (cChord &= ~(RE)); break;
-			case STN_U:				pr ? (cChord |= (RU)) : (cChord &= ~(RU)); break;
-			case STN_FR:			pr ? (cChord |= (RF)) : (cChord &= ~(RF)); break;
-			case STN_RR:			pr ? (cChord |= (RR)) : (cChord &= ~(RR)); break;
-			case STN_PR:			pr ? (cChord |= (RP)) : (cChord &= ~(RP)); break;
-			case STN_BR:			pr ? (cChord |= (RB)) : (cChord &= ~(RB)); break;
-			case STN_LR:			pr ? (cChord |= (RL)) : (cChord &= ~(RL)); break;
-			case STN_GR:			pr ? (cChord |= (RG)) : (cChord &= ~(RG)); break;
-			case STN_TR:			pr ? (cChord |= (RT)) : (cChord &= ~(RT)); break;
-			case STN_SR:			pr ? (cChord |= (RS)) : (cChord &= ~(RS)); break;
-			case STN_DR:			pr ? (cChord |= (RD)) : (cChord &= ~(RD)); break;
-			case STN_ZR:			pr ? (cChord |= (RZ)) : (cChord &= ~(RZ)); break;
+		// Protect cChord and send current keyboard state
+		tChord = cChord;
+		processChord(false);
+		send_keyboard_report();
+		clear_keyboard();
+		cChord = tChord;
+
+		uint32_t priorState = 0;
+		uint32_t stopState = UINT32_MAX;
+		chordState[31] = stopState; // Should be true anyway
+
+		// Remove released keys from history
+		for (int i = 0; i < chordIndex; i++) {
+			chordState[i] &= ~releasedChord;
+		}
+
+#ifndef NO_DEBUG
+		sprintf(debugMsg, "rel: %lo\n", releasedChord);
+		uprintf("%s", debugMsg);
+#endif
+
+		// collapse array to remove duplicate entries
+		for (int i = 0; i < chordIndex; i++) {
+			while ((chordState[i] == priorState) && (chordState[i] != stopState)) {
+				for (int j = i; chordState[j] != stopState; j++)
+					chordState[j] = chordState[j+1];
+			}
+			priorState = chordState[i];
+			if (chordState[i] == stopState) chordIndex = i;
+		}
+
+		cChord &= ~releasedChord;
+		releasedChord = 0;
+#ifndef NO_DEBUG
+		sprintf(debugMsg,"idx: %x\n", chordIndex);
+		uprintf("%s", debugMsg);
+		for (int i; i < 24; i++) {
+			sprintf(debugMsg, "%x:%12lo\n", i, chordState[i]);
+			uprintf("%s", debugMsg);
+		}
+#endif
 	}
+
+	cChord |= newKey;
 
 	// Store previous state for fastQWER
-	if (pr) {
-		chordState[chordIndex] = cChord; 
-		chordIndex++;
-	}
+	chordState[chordIndex] = cChord; 
+	chordIndex++;
 
 	return true; 
 }
@@ -301,7 +353,7 @@ void processChord(bool useFakeSteno) {
 	uint32_t mask		= 0;
 
 	// We iterate over it multiple times to catch the longest
-	// chord. Then that gets addded to the mask and re run.
+	// chord. Then that gets added to the mask and re run.
 	while (savedChord != mask) {
 		uint32_t test  	 		= 0;
 		uint32_t longestChord	= 0;
@@ -311,16 +363,17 @@ void processChord(bool useFakeSteno) {
 			if (cChord == 0)
 				continue;
 
-			// Assume mid parse Sym is new chord
-			if (i != 0 && test != 0 && (cChord ^ test) == PWR) {
-				longestChord = test;
-				break;
+			for ( int i=0; i < stenoLayerCount; i++) {
+				// Assume mid parse layer is new chord
+				if (i != 0 && test != 0 && ((cChord ^ test) == stenoLayers[i])) {
+					longestChord = test;
+					break;
+				}
+
+				// Lock layers in once detected
+				if ((mask & stenoLayers[i]) == stenoLayers[i])
+					cChord |= stenoLayers[i];
 			}
-
-			// Lock SYM layer in once detected
-			if (mask & PWR)
-				cChord |= PWR;
-
 
 			// Testing for keycodes
 			if (useFakeSteno) {
@@ -355,7 +408,7 @@ void processChord(bool useFakeSteno) {
 	}
 
 	// Save state in case of repeat
-	if (!repeatFlag) {			
+	if (!repeatFlag) {
 		saveState(savedChord);
 	}
 
