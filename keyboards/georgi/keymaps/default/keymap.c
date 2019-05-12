@@ -137,26 +137,26 @@ uint32_t processQwerty(bool lookup) {
     // Symbols and Numbers
     P( PWR | RE | RU,      SEND(KC_ENT));
     P( PWR | LA | LO,      SEND(KC_SPC));
-    P( PWR | LP | LW,      SEND(KC_LSFT); SEND(KC_9));       // (
-    P( PWR | LH | LR,      SEND(KC_LSFT); SEND(KC_0));       // )
-    P( PWR | ST1 | ST2,    SEND(KC_GRV));                    // `
+    P( PWR | LP | LW,      SEND_STRING("("));
+    P( PWR | LH | LR,      SEND_STRING(")"));
+    P( PWR | ST1 | ST2,    SEND(KC_GRV));
     P( PWR | RD | RZ,      SEND(KC_ESC));
-    P( PWR | LSU | LSD,    SEND(KC_LSFT); SEND(KC_3));       // #
-    P( PWR | LFT | LK,     SEND(KC_LSFT); SEND(KC_4));       // $
-    P( PWR | LSU,          SEND(KC_LSFT); SEND(KC_1));       // !
-    P( PWR | LSD,          SEND(KC_LSFT); SEND(KC_5));       // %
-    P( PWR | LFT,          SEND(KC_LSFT); SEND(KC_2));       // @
-    P( PWR | LK,           SEND(KC_LSFT); SEND(KC_6));       // ^
-    P( PWR | LP,           SEND(KC_LSFT); SEND(KC_LBRC));    // {
+    P( PWR | LSU | LSD,    SEND_STRING("#"));
+    P( PWR | LFT | LK,     SEND_STRING("$"));
+    P( PWR | LSU,          SEND_STRING("!"));
+    P( PWR | LSD,          SEND_STRING("%"));
+    P( PWR | LFT,          SEND_STRING("@"));
+    P( PWR | LK,           SEND_STRING("^"));
+    P( PWR | LP,           SEND_STRING("{"));
     P( PWR | LW,           SEND(KC_LBRC));
-    P( PWR | LH,           SEND(KC_LSFT); SEND(KC_RBRC));    // }
+    P( PWR | LH,           SEND_STRING("}"));
     P( PWR | LR,           SEND(KC_RBRC));
-    P( PWR | ST1,          SEND(KC_LSFT); SEND(KC_BSLS));    // |
-    P( PWR | ST2,          SEND(KC_LSFT); SEND(KC_GRV));     // ~
+    P( PWR | ST1,          SEND_STRING("|"));
+    P( PWR | ST2,          SEND_STRING("~"));
     P( PWR | ST3,          SEND(KC_QUOT));
-    P( PWR | ST4,          SEND(KC_LSFT); SEND(KC_QUOT));    // "
+    P( PWR | ST4,          SEND_STRING("\""));
     P( PWR | RF,           SEND(KC_KP_PLUS));
-    P( PWR | RR,           SEND(KC_LSFT); SEND(KC_7));       // &
+    P( PWR | RR,           SEND_STRING("&"))
     P( PWR | RP,           SEND(KC_MINS));
     P( PWR | RB,           SEND(KC_EQL));
     P( PWR | RL,           SEND(KC_SLSH));
