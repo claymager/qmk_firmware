@@ -201,7 +201,7 @@ bool process_steno_user(uint16_t keycode, keyrecord_t *record) {
 		chordState[31] = stopState; // Should be true anyway
 
 		// Remove released keys from history
-		for (int i = 0; chordState[i] != stopState; i++) {
+		for (int i = 0; i <= chordIndex; i++) {
 			chordState[i] &= ~releasedChord;
         }
 
