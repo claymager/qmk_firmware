@@ -196,14 +196,17 @@ bool process_steno_user(uint16_t keycode, keyrecord_t *record) {
 		send_keyboard_report();
 		clear_keyboard();
 
-		// Remove released keys from history
 		uint32_t priorState = 0;
 		uint32_t stopState = 0xFFFF;
 		chordState[31] = stopState; // Should be true anyway
 
+		// Remove released keys from history
 		for (int i = 0; chordState[i] != stopState; i++) {
 			chordState[i] &= ~releasedChord;
-			// collapse array to remove duplicate entries
+        }
+
+        // collapse array to remove duplicate entries
+		for (int i = 0; chordState[i] != stopState; i++) {
 			while ((chordState[i] == priorState) && (chordState[i] != stopState)) {
 				for (int j = i; chordState[j] != stopState; j++)
 					chordState[j] = chordState[j+1];
