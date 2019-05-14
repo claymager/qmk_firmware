@@ -132,7 +132,7 @@ out:
 	clear_keyboard();
 	repEngaged  = false;
 	for (int i = 0; i < 32; i++)
-		chordState[i] = 0xFFFF;
+		chordState[i] = UINT32_MAX;
 
 	return false;
 }
@@ -199,7 +199,7 @@ bool process_steno_user(uint16_t keycode, keyrecord_t *record) {
 		cChord = tChord;
 
 		uint32_t priorState = 0;
-		uint32_t stopState = 0xFFFF;
+		uint32_t stopState = UINT32_MAX;
 		chordState[31] = stopState; // Should be true anyway
 
 		// Remove released keys from history
