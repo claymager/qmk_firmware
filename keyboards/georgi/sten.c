@@ -192,27 +192,29 @@ bool process_steno_user(uint16_t keycode, keyrecord_t *record) {
 	// If a key is pressed twice in the same (QWERTY) chord, assume intentional.
 	// Send the current state of the chord and reset.
 	if (cMode == QWERTY && cChord == (cChord | newKey)) {
+		uint32_t tChord = cChord; // Protect cChord from modifications
 		processChord(false);
 		send_keyboard_report();
 		clear_keyboard();
+		cChord = tChord;
 
 		uint32_t priorState = 0;
 		uint32_t stopState = 0xFFFF;
 		chordState[31] = stopState; // Should be true anyway
 
 		// Remove released keys from history
-		for (int i = 0; i <= chordIndex; i++) {
+		for (int i = 0; i < chordIndex; i++) {
 			chordState[i] &= ~releasedChord;
-        }
+		}
 
-        // collapse array to remove duplicate entries
-		for (int i = 0; chordState[i] != stopState; i++) {
+		// collapse array to remove duplicate entries
+		for (int i = 0; i < chordIndex; i++) {
 			while ((chordState[i] == priorState) && (chordState[i] != stopState)) {
 				for (int j = i; chordState[j] != stopState; j++)
 					chordState[j] = chordState[j+1];
 			}
 			priorState = chordState[i];
-			chordIndex = i;
+			if (chordState[i] == stopState) chordIndex = i;
 		}
 
 		cChord &= ~releasedChord;
