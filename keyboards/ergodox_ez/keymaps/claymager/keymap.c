@@ -37,7 +37,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |---------+-----+-----+-----+-----+-----|     |           |     |-----+-----+-----+-----+-----+-------|
  * |osl NUM  |  A  |  R  |  S  |  T  |  G  |-----|           |-----|  M  |  N  |  E  |  I  |  O  |osl SYM|
  * |---------+-----+-----+-----+-----+-----|     |           |     |-----+-----+-----+-----+-----+-------|
- * | LCtrl   |  Z  |  X  |  C  |  D  |  V  |     |           |     |  K  |  H  |  ,  |  .  |  /  | RCtrl |
+ * | BkSp/NUM|  Z  |  X  |  C  |  D  |  V  |     |           |     |  K  |  H  |  ,  |  .  |  /  | RCtrl |
  * `---------+-----+-----+-----+-----+-----------'           `-----------+-----+-----+-----+-----+-------'
  *   |   <-  |  -> |     |L_Alt|Enter|                                   |Super|R_Alt|     |  ↓  |  ↑  |
  *   `-------------------------------'                                   `-----------------------------'
@@ -54,7 +54,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       TG(META),           KC_F1,         KC_F2,  KC_F3,    KC_F4,     KC_F5,  KC_F6,
       LALT_T(KC_BSPACE),  KC_Q,          KC_W,   KC_F,     KC_P,      KC_B,   _xx_,
       OSL(NUMB),          KC_A,          KC_R,   KC_S,     KC_T,      KC_G,
-      KC_LCTRL,           LT(NAV,KC_Z),  KC_X,   KC_C,     KC_D,      KC_V,   ____,
+      LT(NUMB,KC_BSPACE),  LT(NAV,KC_Z),  KC_X,   KC_C,     KC_D,      KC_V,   ____,
       KC_LEFT,            KC_RIGHT,      ____,   KC_LALT,  KC_ENTER,
       KC_MEDIA_PREV_TRACK,  KC_MEDIA_NEXT_TRACK,
       KC_MEDIA_PLAY_PAUSE,
@@ -62,9 +62,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
       // right hand
       KC_F7,  KC_F8,  KC_F9,  KC_F10,     KC_F11,  KC_F12,     RGB_TOG,
-      ____,   KC_J,   KC_L,   KC_U,       KC_Y,    KC_SCOLON,  RALT_T(KC_DELETE),
+      ____,   KC_J,   KC_L,   KC_U,       KC_Y,    KC_SCOLON,  KC_RCTL,
               KC_M,   KC_N,   KC_E,       KC_I,    KC_O,       OSL(SYMB),
-      ____,   KC_K,   KC_H,   KC_COMMA,   KC_DOT,  KC_SLASH,   KC_RCTL,
+      ____,   KC_K,   KC_H,   KC_COMMA,   KC_DOT,  KC_SLASH,   LT(SYMB,KC_DEL),
                       KC_LGUI,  KC_RALT,  ____,    KC_DOWN,    KC_UP,
       KC_AUDIO_VOL_UP,      KC_AUDIO_MUTE,
       KC_AUDIO_VOL_DOWN,
