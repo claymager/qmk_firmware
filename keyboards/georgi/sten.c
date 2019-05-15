@@ -12,6 +12,9 @@ int		 pChordIndex 	= 0;		// Keys in previousachord
 uint32_t pChordState[32];			// Previous chord sate 
 uint32_t stickyBits = 0;			// Or'd with every incoming press
 int32_t releasedChord = 0;			// keys released from current chord
+#ifndef NO_DEBUG
+char debugMsg[32];
+#endif
 
 // Mode state
 enum MODE { STENO = 0, QWERTY, COMMAND };
@@ -207,6 +210,11 @@ bool process_steno_user(uint16_t keycode, keyrecord_t *record) {
 			chordState[i] &= ~releasedChord;
 		}
 
+#ifndef NO_DEBUG
+		sprintf(debugMsg, "rel: %lo\n", releasedChord);
+		uprintf("%s", debugMsg);
+#endif
+
 		// collapse array to remove duplicate entries
 		for (int i = 0; i < chordIndex; i++) {
 			while ((chordState[i] == priorState) && (chordState[i] != stopState)) {
@@ -219,6 +227,14 @@ bool process_steno_user(uint16_t keycode, keyrecord_t *record) {
 
 		cChord &= ~releasedChord;
 		releasedChord = 0;
+#ifndef NO_DEBUG
+		sprintf(debugMsg,"idx: %x\n", chordIndex);
+		uprintf("%s", debugMsg);
+		for (int i; i < 24; i++) {
+			sprintf(debugMsg, "%x:%12lo\n", i, chordState[i]);
+			uprintf("%s", debugMsg);
+		}
+#endif
 	}
 
 	cChord |= newKey;
