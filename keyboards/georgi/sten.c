@@ -194,8 +194,10 @@ bool process_steno_user(uint16_t keycode, keyrecord_t *record) {
 
 	// If a key is pressed twice in the same (QWERTY) chord, assume intentional.
 	// Send the current state of the chord and reset.
-	if (cMode == QWERTY && cChord == (cChord | newKey)) {
-		uint32_t tChord = cChord; // Protect cChord from modifications
+	if (cMode == QWERTY && cChord & newKey && !(cChord & FN)) {
+
+		// Protect cChord and send current keyboard state
+		uint32_t tChord = cChord;
 		processChord(false);
 		send_keyboard_report();
 		clear_keyboard();
