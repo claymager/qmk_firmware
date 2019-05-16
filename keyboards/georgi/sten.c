@@ -11,9 +11,24 @@ uint32_t pChord 		= 0;		// Previous Chord
 int		 pChordIndex 	= 0;		// Keys in previousachord
 uint32_t pChordState[32];			// Previous chord sate 
 uint32_t stickyBits = 0;			// Or'd with every incoming press
-int32_t releasedChord = 0;			// keys released from current chord
 #ifndef NO_DEBUG
 char debugMsg[32];
+#endif
+
+// StenoLayer
+uint32_t releasedChord	= 0;		// Keys released from current chord
+uint32_t tChord			= 0;		// Protects state of cChord
+#ifndef STENOLAYERS
+#pragma message "\n\n" \
+    "----------------------------------\n" \
+	"*Georgi now has StenoLayers!*\n" \
+	"Re-copy the default `rules.mk` and add this to your `keymap.c`:\n\n" \
+	"uint32_t stenoLayers[] = { PWR };\n" \
+	"size_t stenoLayerCount = sizeof(stenoLayers)/sizeof(stenoLayers[0]);\n\n" \
+	"See the colemak-dh keymap for ideas!\n" \
+    "----------------------------------\n"
+uint32_t stenoLayers[] = { PWR };
+size_t stenoLayerCount = sizeof(stenoLayers)/sizeof(stenoLayers[0]);
 #endif
 
 // Mode state
@@ -197,7 +212,7 @@ bool process_steno_user(uint16_t keycode, keyrecord_t *record) {
 	if (cMode == QWERTY && cChord & newKey && !(cChord & FN)) {
 
 		// Protect cChord and send current keyboard state
-		uint32_t tChord = cChord;
+		tChord = cChord;
 		processChord(false);
 		send_keyboard_report();
 		clear_keyboard();
@@ -355,15 +370,21 @@ void processChord(bool useFakeSteno) {
 			if (cChord == 0)
 				continue;
 
-			// Assume mid parse Sym is new chord
-			if (i != 0 && test != 0 && (cChord ^ test) == PWR) {
-				longestChord = test;
-				break;
+			// Assume mid parse layer is new chord (only works for single keys)
+			if (i != 0 && test != 0) {
+				for ( int i=0; i < stenoLayerCount; i++) {
+					if ((cChord ^ test) == stenoLayers[i]) {
+						longestChord = test;
+						break;
+					}
+				}
 			}
 
-			// Lock SYM layer in once detected
-			if (mask & PWR)
-				cChord |= PWR;
+			// Lock layers in once detected
+			for ( int i=0; i < stenoLayerCount; i++) {
+				if ((mask & stenoLayers[i]) == stenoLayers[i])
+					cChord |= stenoLayers[i];
+			}
 
 
 			// Testing for keycodes

@@ -20,6 +20,14 @@
 #define MEDIA   (LSD | LK | LW | LR)
 #define MOVE    (ST1 | ST2)
 
+// Keys and chords that, once they appear, are added to every subsequent partial chord
+// until the whole thing is sent.
+//
+// It is HIGHLY recommended that these are simple (PWR, RNO) or unnatural (MEDIA).
+// If you won't use different commands from the same layer in quick succession,
+// don't add them here.
+uint32_t stenoLayers[] = { PWR, RNO, MEDIA };
+
 // QMK Layers
 #define STENO_LAYER   0
 #define GAMING        1
@@ -37,7 +45,14 @@
  */
 
 // Note: You can only use basic keycodes here!
+//
 // P() is just a wrapper to make your life easier.
+// PC() applies the mapping to all of the StenoLayers.
+//   To overload, declare it with P() first.
+//
+//
+// FN is unavailable. That is reserved for system use.
+// Chords containing PWR are always available, even in steno mode.
 //
 // http://docs.gboards.ca
 uint32_t processQwerty(bool lookup) {
@@ -236,3 +251,4 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 // Don't fuck with this, thanks.
 size_t keymapsCount  = sizeof(keymaps)/sizeof(keymaps[0]);
+size_t stenoLayerCount = sizeof(stenoLayers)/sizeof(stenoLayers[0]);
