@@ -360,7 +360,7 @@ void processChord(bool useFakeSteno) {
 	uint32_t mask		= 0;
 
 	// We iterate over it multiple times to catch the longest
-	// chord. Then that gets addded to the mask and re run.
+	// chord. Then that gets added to the mask and re run.
 	while (savedChord != mask) {
 		uint32_t test  	 		= 0;
 		uint32_t longestChord	= 0;
@@ -370,22 +370,17 @@ void processChord(bool useFakeSteno) {
 			if (cChord == 0)
 				continue;
 
-			// Assume mid parse layer is new chord (only works for single keys)
-			if (i != 0 && test != 0) {
-				for ( int i=0; i < stenoLayerCount; i++) {
-					if ((cChord ^ test) == stenoLayers[i]) {
-						longestChord = test;
-						break;
-					}
-				}
-			}
-
-			// Lock layers in once detected
 			for ( int i=0; i < stenoLayerCount; i++) {
+				// Assume mid parse layer is new chord
+				if (i != 0 && test != 0 && ((cChord ^ test) == stenoLayers[i])) {
+					longestChord = test;
+					break;
+				}
+
+				// Lock layers in once detected
 				if ((mask & stenoLayers[i]) == stenoLayers[i])
 					cChord |= stenoLayers[i];
 			}
-
 
 			// Testing for keycodes
 			if (useFakeSteno) {
@@ -420,7 +415,7 @@ void processChord(bool useFakeSteno) {
 	}
 
 	// Save state in case of repeat
-	if (!repeatFlag) {			
+	if (!repeatFlag) {
 		saveState(savedChord);
 	}
 

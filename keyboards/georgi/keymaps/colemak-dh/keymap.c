@@ -254,7 +254,6 @@ uint32_t processQwerty(bool lookup) {
 	// overrides
 	P( PWR | LO,			SEND(KC_LSFT); SEND(KC_BSPC));
 	P( PWR | RD,			SEND(KC_LCTL); SEND(KC_BSPC));
-	P( RZ | RD,				SEND(KC_LCTL); SEND(KC_DEL));
 
 	PC( LNO | LA | LO,		SEND(KC_LSFT); SEND(KC_ESC));
 	PC( LA | LO,			SEND(KC_ESC));
