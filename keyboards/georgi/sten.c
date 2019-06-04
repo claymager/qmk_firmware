@@ -105,7 +105,14 @@ bool send_steno_chord_user(steno_mode_t mode, uint8_t chord[6]) {
 	// Lone FN press, toggle QWERTY
 #ifndef ONLYQWERTY
 	if (cChord == FN) {
-		(cMode == STENO) ? (cMode = QWERTY) : (cMode = STENO);
+		if (cMode == STENO) {
+			cMode = QWERTY;
+			SEND(KC_LGUI); SEND(KC_LCTL); SEND(KC_LSFT); SEND(KC_Q);
+		}
+	    else {
+			cMode = STENO;
+			SEND(KC_LGUI); SEND(KC_LCTL); SEND(KC_LSFT); SEND(KC_S);
+		}
 		goto out;
 	}
 #endif
