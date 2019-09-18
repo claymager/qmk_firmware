@@ -245,7 +245,7 @@ bool user_macros(uint32_t chord) {
         return true;
     }
 
-    if (chord == (FN | RD)) {
+    if (chord == (FN | LO)) {
         use_verbose_debugging = !use_verbose_debugging;
         return false;
     }
