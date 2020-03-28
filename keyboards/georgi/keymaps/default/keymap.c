@@ -1,321 +1,234 @@
-#include QMK_KEYBOARD_H
-#include "state.h"      // set_sticky
-#include "mode.h"       // steno_mode,  USER_MACRO
-#define IGNORE_SLOW_TRANS_TAP_INTERRUPT
-
-
-
-/* Keyboard Layout
- * ,---------------------------------.    ,------------------------------.
- * | FN  | LSU | LFT | LP | LH | ST1 |    | ST3 | RF | RP | RL | RT | RD |
- * |-----+-----+-----+----+----|-----|    |-----|----+----+----+----+----|
- * | PWR | LSD | LK  | LW | LR | ST2 |    | ST4 | RR | RB | RG | RS | RZ |
- * `---------------------------------'    `------------------------------'
- *                   ,---------------,    .---------------.
- *                   | LNO | LA | LO |    | RE | RU | RNO |
- *                   `---------------'    `---------------'
+/*
+ * Good on you for modifying your layout, this is the most nonQMK layout you will come across
+ * There are three modes, Steno (the default), QWERTY (Toggleable) and a Momentary symbol layer
+ *
+ * Don't modify the steno layer directly, instead add chords using the keycodes and macros
+ * from sten.h to the layout you want to modify.
+ *
+ * Observe the comment above processQWERTY!
+ *
+ * http://docs.gboards.ca
  */
 
+#include QMK_KEYBOARD_H
+#include "sten.h"
+#include "keymap_steno.h"
 
-
-// Steno Layers.
-//
-// Each should be added three times in this section, plus in the main map
-//
-// Layers containing PWR are always available, even in Plover mode.
-//
-// Don't make two exclusive layers (PWR and LSD | LK) that OR to a third
-// ( PWR | LSD | LK ); they will collide weirdly and confuse you.
-#define FUNCT   ( LSD | LK | LP | LH )
-#define MEDIA   ( LSD | LK | LW | LR )
-#define MOUSE   ( PWR | LSD )
-#define MOVE    ( LSD | LK)
-#define NUM     ( PWR )
-#define SYM     ( RZ )
-
-// Order matters! In the event of a collision, stay on the earlier layer
-const uint32_t steno_layers[] = {MOVE, MOUSE, MEDIA, FUNCT, RES2, SYM, NUM};
-
-#define __x__ KC_NO
-#define TRANSPARENT(chord, act) \
-    KEY(chord, act) \
-    KEY(FUNCT | chord, act) \
-    KEY(MEDIA | chord, act) \
-    KEY(MOUSE | chord, act) \
-    KEY(MOVE | chord, act) \
-    KEY(NUM | chord, act) \
-    KEY(SYM | chord, act) \
-    KEY(RES2 | chord, act)
-
+// Proper Layers
+#define FUNCT   (LSD | LK | LP | LH)
+#define MEDIA   (LSD | LK | LW | LR)
+#define MOVE    (ST1 | ST2)
 
 // QMK Layers
 #define STENO_LAYER   0
 #define GAMING        1
 #define GAMING_2      2
 
-// Primary (non-qmk) layout
+/* Keyboard Layout
+ * ,---------------------------------.    ,------------------------------.
+ * | FN  | LSU | LFT | LP | LH | ST1 |    | ST3 | RF | RP | RL | RT | RD |
+ * |-----+-----+-----+----+----|-----|    |-----|----+----+----+----+----|
+ * | PWR | LSD | LK  | LW | LR | ST2 |    | ST4 | RR | BB | RG | RS | RZ |
+ * `---------------------------------'    `------------------------------'
+ *                   ,---------------,    .---------------.
+ *                   | LNO | LA | LO |    | RE | RU | RNO |
+ *                   `---------------'    `---------------'
+ */
+
+// Note: You can only use basic keycodes here!
+// P() is just a wrapper to make your life easier.
+// PC() applies the mapping to all of the StenoLayers.
+//   To overload, declare it with P() first.
+//   Be sure to enable in rules.mk and see colemak-dh for usage 
 //
-// This takes many of the basic QMK keycodes, but for anything more complex,
-// see user_macros below.
+// FN is unavailable. That is reserved for system use.
+// Chords containing PWR are always available, even in steno mode.
 //
-// RIGHT_HAND, LEFT_HAND, and LETTER_KEYS are helper macros that cover the five internal
-// columns (i.e. no thumb keys, and not the ones a pinky would stretch to)
-//
-// These are not QMK layers. KC_TRANS probably does not act how you would expect.
-//
-// Overrides go AT THE END of this keymap.
-const mapping_t keymap[] PROGMEM = {
+// http://docs.gboards.ca
+uint32_t processQwerty(bool lookup) {
+    // Specials
+    P( RT  | RS  | RD  | RZ | LNO,        SEND_STRING(VERSION); SEND_STRING(__DATE__));
+    P( LNO | RNO | LA  | LO | RE | RU,    SEND(KC_MPLY));
+    P( LFT | LK  | LP  | LW,              REPEAT());
+    P( ST1 | ST2 | LW  | ST4,             SEND(KC_BSPC));
 
-    // Thumb Chords and modifiers
-    //
-    TRANSPARENT( LNO | RNO | LA | RU,  LCTL(KC_LSFT))
-    TRANSPARENT( LNO | LA | LO,        LSFT(KC_ESC))
-    KEY( LA | LO | RE | RU,            LSFT(KC_ENT))
+    // Mouse Keys
+    P( LO  | LSD | LK,    CLICK_MOUSE(KC_MS_BTN2));
+    P( LO  | LR  | LW,    CLICK_MOUSE(KC_MS_BTN1));
 
-    TRANSPARENT( LA | LO,    KC_ESC)
-    TRANSPARENT( LNO,        KC_LALT)
-    TRANSPARENT( LA,         KC_ENT)
-    TRANSPARENT( LO,         KC_LSFT)
+    // Thumb Chords
+    P( LA  | LO  | RE  | RU,    SEND(KC_CAPS));
+    P( LA  | RU,                SEND(KC_ESC));
+    P( LO  | RE,                SEND(KC_LCTL));
+    P( LNO | RNO | LA | RU,     SEND(KC_LCTL); SEND(KC_LSFT));
+    P( LNO | LA  | RE,          SEND(KC_LCTL); SEND(KC_LSFT); SEND(KC_LALT));
 
-    TRANSPARENT( RNO,        KC_RALT)
-    TRANSPARENT( RE | RU,    KC_TAB)
-    TRANSPARENT( RE,         KC_SPC)
-    TRANSPARENT( RU,         KC_LGUI)
+    // Mods
+    P( RT | RD   | RS | RZ,    SEND(KC_LGUI));
+    P( RT | RD,                SEND(KC_LCTL));
+    P( RS | RZ,                SEND(KC_LALT));
+    P( LA | LNO,               SEND(KC_LCTL));
+    P( LA | LO,                SEND(KC_LALT));
+    P( LO,                     SEND(KC_LSFT));
 
-    TRANSPARENT( RD,         KC_LCTL)
-    TRANSPARENT( PWR,        KC_BSPC)
-    SLOW_KEY( PWR,           KC_BSPC)
-    SLOW_KEY( RZ,            KC_DEL)
-    KEY( PWR | RZ,           KC_BSPC)
+    // Function Layer
+    P( FUNCT | RF | RR,    SEND(KC_F5));
+    P( FUNCT | RP | RB,    SEND(KC_F6));
+    P( FUNCT | RL | RG,    SEND(KC_F7));
+    P( FUNCT | RT | RS,    SEND(KC_F8));
+    P( FUNCT | RF,         SEND(KC_F1));
+    P( FUNCT | RP,         SEND(KC_F2));
+    P( FUNCT | RL,         SEND(KC_F3));
+    P( FUNCT | RT,         SEND(KC_F4));
+    P( FUNCT | RR,         SEND(KC_F9));
+    P( FUNCT | RG,         SEND(KC_F10));
+    P( FUNCT | RB,         SEND(KC_F11));
+    P( FUNCT | RS,         SEND(KC_F12));
 
+    // Movement Layer
+    P( MOVE | RF,     SEND(KC_LEFT));
+    P( MOVE | RP,     SEND(KC_DOWN));
+    P( MOVE | RL,     SEND(KC_UP));
+    P( MOVE | RT,     SEND(KC_RIGHT));
+    P( MOVE | ST3,    SEND(KC_PGUP));
+    P( MOVE | ST4,    SEND(KC_PGDN));
 
-/* Function layer
- * ,-----------------------------------,    ,-----------------------------------,
- * |     |     |     | NCTFUNCTF |     |    | xxx | F1  | F2  | F3  | F4  |     |
- * |     +     +     +     +     +     |    |     + F5  + F6  + F7  + F8  +     |
- * |     | FUNCTFUNC |     |     |     |    | xxx | F9  | F10 | F11 | F12 |     |
- * `-----+-----+-----+-----+-----+-----'    `-----+-----+-----+-----+-----+-----'
-*/
-    RIGHT_HAND( FUNCT,
-        __x__, KC_F1, KC_F2,  KC_F3,  KC_F4,
-        __x__, KC_F5, KC_F6,  KC_F7,  KC_F8,
-        __x__, KC_F9, KC_F10, KC_F11, KC_F12)
+    // Media Layer
+    P( MEDIA | RF,    SEND(KC_MPRV));
+    P( MEDIA | RP,    SEND(KC_MPLY));
+    P( MEDIA | RL,    SEND(KC_MPLY));
+    P( MEDIA | RT,    SEND(KC_MNXT));
+    P( MEDIA | RD,    SEND(KC_VOLU));
+    P( MEDIA | RZ,    SEND(KC_VOLD));
+    P( MEDIA | RS,    SEND(KC_MUTE));
 
+    // Number Row, Left
+    P( LNO | LSU,    SEND(KC_1));
+    P( LNO | LFT,    SEND(KC_2));
+    P( LNO | LP,     SEND(KC_3));
+    P( LNO | LH,     SEND(KC_4));
+    P( LNO | ST1,    SEND(KC_5));
+    P( LNO | ST3,    SEND(KC_6));
+    P( LNO | RF,     SEND(KC_7));
+    P( LNO | RP,     SEND(KC_8));
+    P( LNO | RL,     SEND(KC_9));
+    P( LNO | RT,     SEND(KC_0));
 
-/* Movement layer
- * ,-----------------------------------,    ,-----------------------------------,
- * |     |     |     |     |     |     |    | xxx | <-  |  ↓  |  ↑  | ->  |     |
- * |     +     +     +     +     +     |    |     +     +     +     +     +     |
- * |     | MOVEMOVEM |     |     |     |    | xxx | Hm  | PgD | PgU | End |     |
- * `-----+-----+-----+-----+-----+-----'    `-----+-----+-----+-----+-----+-----'
-*/
-    RIGHT_HAND( MOVE,
-        __x__, KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT,
-        __x__, __x__,   __x__,   __x__,   __x__,
-        __x__, KC_HOME, KC_PGDN, KC_PGUP, KC_END)
+    // Number Row, Right
+    P( RNO | LSU,    SEND(KC_1));
+    P( RNO | LFT,    SEND(KC_2));
+    P( RNO | LP,     SEND(KC_3));
+    P( RNO | LH,     SEND(KC_4));
+    P( RNO | ST1,    SEND(KC_5));
+    P( RNO | ST3,    SEND(KC_6));
+    P( RNO | RF,     SEND(KC_7));
+    P( RNO | RP,     SEND(KC_8));
+    P( RNO | RL,     SEND(KC_9));
+    P( RNO | RT,     SEND(KC_0));
+    P( RNO | LA,     SEND(KC_5));
 
-/* Mouse layer
- * ,-----------------------------------,    ,-----------------------------------,
- * |     |     |     |     |     |     |    | mb2 | w↓  | m↑  | w↑  | acc0|     |
- * |     +     +     +     +     +     |    | mb3 +     +     +     + acc1+     |
- * | MOUSEMOUS |     |     |     |     |    | mb1 | m<- | m↓  | PgU | acc2|     |
- * `-----+-----+-----+-----+-----+-----'    `-----+-----+-----+-----+-----+-----'
-*/
-    RIGHT_HAND( MOUSE,
-        KC_MS_BTN2, KC_MS_WH_DOWN, KC_MS_UP,   KC_MS_WH_UP, KC_MS_ACCEL0,
-        KC_MS_BTN3, __x__,         __x__,      __x__,       KC_MS_ACCEL1,
-        KC_MS_BTN1, KC_MS_LEFT,    KC_MS_DOWN, KC_MS_RIGHT, KC_MS_ACCEL2)
+    // Specials
+    P( RU | RNO,    SEND(KC_TAB));
+    P( RE | RU,     SEND(KC_BSPC));
+    P( RD | RZ,     SEND(KC_ENT));
+    P( RE,          SEND(KC_ENT));
+    P( RD,          SEND(KC_BSPC));
+    P( LNO,         SEND(KC_BSPC));
+    P( RNO,         SEND(KC_BSPC));
+    P( LA,          SEND(KC_SPC));
+    P( RU,          SEND(KC_SPC));
+    P( RZ,          SEND(KC_ESC));
 
-    KEY( MOUSE | LO, KC_MS_BTN1 )
-    KEY( MOUSE | LA, KC_MS_BTN2 )
-    KEY( MOUSE | LA | LO, KC_MS_BTN3 )
+    // Symbols and Numbers
+ 	P( PWR | RE | RU,      SEND(KC_ENT));
+    P( PWR | LA | LO,      SEND(KC_SPC));
+    P( PWR | LP | LW,      SEND(KC_LSFT); SEND(KC_9));       // (
+    P( PWR | LH | LR,      SEND(KC_LSFT); SEND(KC_0));       // )
+    P( PWR | ST1 | ST2,    SEND(KC_GRV));                    // `
+    P( PWR | RD | RZ,      SEND(KC_ESC));
+    P( PWR | LSU | LSD,    SEND(KC_LSFT); SEND(KC_3));       // #
+    P( PWR | LFT | LK,     SEND(KC_LSFT); SEND(KC_4));       // $
+    P( PWR | LSU,          SEND(KC_LSFT); SEND(KC_1));       // !
+    P( PWR | LSD,          SEND(KC_LSFT); SEND(KC_5));       // %
+    P( PWR | LFT,          SEND(KC_LSFT); SEND(KC_2));       // @
+    P( PWR | LK,           SEND(KC_LSFT); SEND(KC_6));       // ^
+    P( PWR | LP,           SEND(KC_LSFT); SEND(KC_LBRC));    // {
+    P( PWR | LW,           SEND(KC_LBRC));
+    P( PWR | LH,           SEND(KC_LSFT); SEND(KC_RBRC));    // }
+    P( PWR | LR,           SEND(KC_RBRC));
+    P( PWR | ST1,          SEND(KC_LSFT); SEND(KC_BSLS));    // |
+    P( PWR | ST2,          SEND(KC_LSFT); SEND(KC_GRV));     // ~
+    P( PWR | ST3,          SEND(KC_QUOT));
+    P( PWR | ST4,          SEND(KC_LSFT); SEND(KC_QUOT));    // "
+    P( PWR | RF,           SEND(KC_KP_PLUS));
+    P( PWR | RR,           SEND(KC_LSFT); SEND(KC_7));       // &
+    P( PWR | RP,           SEND(KC_MINS));
+    P( PWR | RB,           SEND(KC_EQL));
+    P( PWR | RL,           SEND(KC_SLSH));
+    P( PWR | RG,           SEND(KC_COMM));
+    P( PWR | RT,           SEND(KC_PAST));
+    P( PWR | RS,           SEND(KC_DOT));
+    P( PWR | RD,           SEND(KC_TAB));
+    P( PWR | LA,           SEND(KC_LSFT));
+    P( PWR | LO,           SEND(KC_SLSH));
+    P( PWR | RE,           SEND(KC_SCLN));
+    P( PWR | RU,           SEND(KC_BSLS));
+    P( PWR | LNO,          SEND(KC_BSLS));
+    P( PWR | RF | RR,      SEND(KC_LEFT));
+    P( PWR | RP | RB,      SEND(KC_DOWN));
+    P( PWR | RL | RG,      SEND(KC_UP));
+    P( PWR | RT | RS,      SEND(KC_RIGHT));
 
-/* Media Layer
- * ,-----------------------------------,    ,-----------------------------------,
- * |     |     |     |     |     |     |    | VolU|Prev |Play | PLY |Next |     |
- * |     +     +     +     +     +     |    | Mute+     +     +     +     +     |
- * |     | MEDIAMEDIAMEDIAMEDIAM |     |    | VolD| xxX | xxx | xxx | xxx |     |
- * `-----+-----+-----+-----+-----+-----'    `-----+-----+-----+-----+-----+-----'
-*/
-    RIGHT_HAND( MEDIA,
-        KC_VOLU, KC_MPRV, KC_MPLY, KC_MPLY, KC_MNXT,
-        KC_MUTE, __x__,   __x__,   __x__,   __x__,
-        KC_VOLD, __x__,   __x__,   __x__,   __x__)
+    // Letters
+    P( LSU | LSD,    SEND(KC_A));
+    P( LFT | LK,     SEND(KC_S));
+    P( LP  | LW,     SEND(KC_D));
+    P( LH  | LR,     SEND(KC_F));
+    P( ST1 | ST2,    SEND(KC_G));
+    P( ST3 | ST4,    SEND(KC_H));
+    P( RF  | RR,     SEND(KC_J));
+    P( RT  | RS,     SEND(KC_SCLN));
+    P( RG  | RL,     SEND(KC_L));
+    P( RP  | RB,     SEND(KC_K));
+    P( LSU,          SEND(KC_Q));
+    P( LSD,          SEND(KC_Z));
+    P( LFT,          SEND(KC_W));
+    P( LK,           SEND(KC_X));
+    P( LP,           SEND(KC_E));
+    P( LW,           SEND(KC_C));
+    P( LH,           SEND(KC_R));
+    P( LR,           SEND(KC_V));
+    P( ST1,          SEND(KC_T));
+    P( ST2,          SEND(KC_B));
+    P( ST3,          SEND(KC_Y));
+    P( ST4,          SEND(KC_N));
+    P( RF,           SEND(KC_U));
+    P( RR,           SEND(KC_M));
+    P( RP,           SEND(KC_I));
+    P( RB,           SEND(KC_COMM));
+    P( RL,           SEND(KC_O));
+    P( RG,           SEND(KC_DOT));
+    P( RT,           SEND(KC_P));
+    P( RS,           SEND(KC_SLSH));
+    P( RNO,          SEND(KC_BSPC));
+    P( LNO,          SEND(KC_BSPC));
 
-
-/* Numbers
- * ,-----------------------------------,    ,-----------------------------------,
- * |     | xxx |  a  |  b  |  c  | xxx |    |  :  |  1  |  2  |  3  |  .  |     |
- * |     +     +     +     +     +     |    |  0  +  4  +  5  +  6  +  -  +     |
- * | NUM | xxx |  d  |  e  |  f  | xxx |    |     |  7  |  8  |  9  |  0  |     |
- * `-----+-----+-----+-----+-----+-----'    `-----+-----+-----+-----+-----+-----'
-*/
-    LETTER_KEYS( NUM,
-        __x__, KC_A,  KC_B,  KC_C,  __x__,     KC_COLON, KC_1, KC_2, KC_3, KC_DOT,
-        __x__, __x__, __x__, __x__, __x__,     KC_0,     KC_4, KC_5, KC_6, KC_MINUS,
-        __x__, KC_D,  KC_E,  KC_F,  __x__,     __x__,    KC_7, KC_8, KC_9, KC_0)
-
-
-/* Symbols
- * ,-----------------------------------,    ,-----------------------------------,
- * |     |  `  |  [  |  {  |  (  |  <  |    |  >  |  )  |  }  |  ]  |  ?  |     |
- * |     +  ~  +  -  +  '  +  :  +  _  |    |  \  +  =  +  "  +  +  +  ?  +     |
- * |     |  !  |  @  |  #  |  $  |  %  |    |  |  |  ^  |  &  |  *  |  ?  | SYM |
- * `-----+-----+-----+-----+-----+-----'    `-----+-----+-----+-----+-----+-----'
-*/
-    LETTER_KEYS( SYM,
-        KC_GRV,  KC_LBRC, KC_LCBR,  KC_LPRN,  KC_LABK,    KC_RABK,   KC_RPRN,  KC_RCBR, KC_RBRC, KC_QUES,
-        KC_TILD, KC_MINS, KC_QUOTE, KC_COLON, KC_UNDS,    KC_BSLASH, KC_EQUAL, KC_DQUO, KC_PLUS, KC_QUES,
-        KC_EXLM, KC_AT,   KC_HASH,  KC_DLR,   KC_PERC,    KC_PIPE,   KC_CIRC,  KC_AMPR, KC_ASTR, KC_QUES)
-
-
-/* Letters
- * ,-----------------------------------,    ,-----------------------------------,
- * |     |  Q  |  W  |  E  |  R  |  T  |    |  Y  |  U  |  I  |  O  |  L  | ctl |
- * +-----+- A -+- S -+- D -+- F -+- G -|    |- H -+- J -+- K -+- L -+- ' -+-----|
- * | bsp |  Z  |  X  |  C  |  V  |  B  |    |  N  |  M  |  ,  |  .  |  /  | del |
- * `-----+-----+-----+-----+-----+-----'    `-----+-----+-----+-----+-----+-----'
- *                   ,-----------------,    .-----------------.
- *                   | alt |enter|shift|    | spc | gui |altGr|
- *                   `-----------------'    `-----------------'
-*/
-    LETTER_KEYS( 0,
-        KC_Q, KC_W, KC_E, KC_R, KC_T,     KC_Y, KC_U, KC_I,    KC_O,   KC_P,
-        KC_A, KC_S, KC_D, KC_F, KC_G,     KC_H, KC_J, KC_K,    KC_L,   KC_QUOTE,
-        KC_Z, KC_X, KC_C, KC_V, KC_B,     KC_N, KC_M, KC_COMM, KC_DOT, KC_SLSH)
-
-    // Overrides
-    //
-    SLOW_KEY(LSD,   KC_Z)
-    SLOW_KEY(PWR | LSD, __x__)
-    KEY( PWR | LO,  LSFT(KC_BSPC))
-    KEY( PWR | RD,  LCTL(KC_BSPC))
-
-
-    // FAKE STENO
-    //
-    KEY( RES2 | LSU,    KC_Q)
-    KEY( RES2 | LSD,    KC_A)
-    KEY( RES2 | LFT,    KC_W)
-    KEY( RES2 | LP,     KC_E)
-    KEY( RES2 | LH,     KC_R)
-    KEY( RES2 | LK,     KC_S)
-    KEY( RES2 | LW,     KC_D)
-    KEY( RES2 | LR,     KC_F)
-    KEY( RES2 | ST1,    KC_T)
-    KEY( RES2 | ST2,    KC_G)
-    KEY( RES2 | LA,     KC_C)
-    KEY( RES2 | LO,     KC_V)
-    KEY( RES2 | RE,     KC_N)
-    KEY( RES2 | RU,     KC_M)
-    KEY( RES2 | ST3,    KC_Y)
-    KEY( RES2 | ST4,    KC_H)
-    KEY( RES2 | RF,     KC_U)
-    KEY( RES2 | RP,     KC_I)
-    KEY( RES2 | RL,     KC_O)
-    KEY( RES2 | RT,     KC_P)
-    KEY( RES2 | RD,     KC_LBRC)
-    KEY( RES2 | RR,     KC_J)
-    KEY( RES2 | RB,     KC_K)
-    KEY( RES2 | RG,     KC_L)
-    KEY( RES2 | RS,     KC_SCLN)
-    KEY( RES2 | RZ,     KC_COMM)
-    KEY( RES2 | LNO,    KC_1)
-    KEY( RES2 | RNO,    KC_1)
-
-};
-
-
-
-// chordUp macros!
-//
-// Stick with USER_MACRO and chords with FN (which essentially overrides Plover momentaries)
-// and RES1/RES2 unless you like getting your hands dirty.
-bool user_macros(uint32_t chord) {
-
-    // Key combos to notify the OS of mode change
-    uint16_t notify_qwerty = 0; //LGUI(LCTL(LSFT(KC_Q)));
-    uint16_t notify_plover = 0; //LGUI(LCTL(LSFT(KC_S)));
-
-    // Lone FN press:
-    // send notify_****, then proceed as normal (i.e. switch modes)
-    if (chord == FN) {
-        if (steno_mode)
-            register_code16(notify_qwerty);
-        else
-            register_code16(notify_plover);
-        clear_keyboard();
-        return true;
-    }
-
-
-    // Sticky bits and QMK layers
-    //
-    USER_MACRO( FN | RES1,
-        register_code16(notify_qwerty);
-        STICKY_BITS = 0;
-    )
-
-    USER_MACRO( FN | RES2,
-        register_code16(notify_qwerty);
-        STICKY_BITS = 0;
-    )
-
-    // qmk layer switch
-    USER_MACRO( FN | PWR | ST3 | ST4,
-        layer_on(GAMING);
-    )
-
-    // sample text expansion mode
-    USER_MACRO( FN | ST1,
-        STICKY_BITS = RES1;
-    )
-
-    // fake steno mode: use plover through NKRO interface
-    USER_MACRO( FN | PWR | ST1 | ST2,
-        STICKY_BITS = RES2;
-    )
-
-
-    // Misc
-    //
-    USER_MACRO( RES1 | RR,
-        SEND_STRING("username@email.com");
-    )
-
-    USER_MACRO( FN | LSU | LFT | LP,
-        SEND_RAM_STRING("keymap length: %d", keymap_length);
-    )
-
-    /* Version
-     * ,-----------------------------------,    ,-----------------------------------,
-     * |#####|     |     |     |     |     |    |     |     |     |     |###########|
-     * +-----+-----+-----+-----+-----+-----|    |-----+-----+-----+-----+###########|
-     * |     |     |     |     |     |     |    |     |     |     |     |###########|
-     * `-----+-----+-----+-----+-----+-----'    `-----+-----+-----+-----+-----+-----'
-     *                     ,---------------,    .---------------.
-     *                     |     |    |    |    |    |    |     |
-     *                     `---------------'    `---------------'
-    */
-    USER_MACRO( (FN | RT | RS | RD | RZ),
-        SEND_STRING(VERSION " " __DATE__);
-    )
-
-    return false;
+    return 0;
 }
 
+// "Layers"
+// Steno layer should be first in your map.
+// When PWR | FN | ST3 | ST4 is pressed, the layer is increased to the next map. You must return to STENO_LAYER at the end.
+// If you need more space for chords, remove the two gaming layers.
+// Note: If using NO_ACTION_TAPPING, LT will not work!
 
-
-// QMK interface
-//
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     // Main layer, everything goes through here
     [STENO_LAYER] = LAYOUT_georgi(
         STN_FN,  STN_S1,  STN_TL,  STN_PL,  STN_HL,  STN_ST1,       STN_ST3, STN_FR,  STN_PR,  STN_LR,  STN_TR,  STN_DR,
         STN_PWR, STN_S2,  STN_KL,  STN_WL,  STN_RL,  STN_ST2,       STN_ST4, STN_RR,  STN_BR,  STN_GR,  STN_SR,  STN_ZR,
-                                    STN_N1, STN_A,   STN_O,         STN_E,   STN_U,   STN_N7
+                                   STN_N1,  STN_A,   STN_O,         STN_E,   STN_U,   STN_N7
     ),
-
     // Gaming layer with Numpad, Very limited
     [GAMING] = LAYOUT_georgi(
         KC_LSFT, KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                       KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_ENT,
@@ -330,9 +243,5 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     )
 };
 
-
-
 // Don't fuck with this, thanks.
-const size_t keymapsCount  = sizeof(keymaps)/sizeof(keymaps[0]);
-const size_t n_steno_layers = sizeof(steno_layers)/sizeof(steno_layers[0]);
-const size_t keymap_length  = sizeof(keymap)/sizeof(keymap[0]);
+size_t keymapsCount  = sizeof(keymaps)/sizeof(keymaps[0]);

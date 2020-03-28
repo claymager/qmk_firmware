@@ -27,13 +27,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "util.h"
 #include "keymap_steno.h"
 #include QMK_KEYBOARD_H
-#ifdef DEBUG_MATRIX_SCAN_RATE
-#include  "timer.h"
-#endif
-
 
 #ifndef DEBOUNCE
-#   define DEBOUNCE 5
+#   define DEBOUNCE	5
 #endif
 
 // MCP Pin Defs
@@ -92,12 +88,6 @@ static void select_row(uint8_t row);
 static uint8_t mcp23018_reset_loop;
 // static uint16_t mcp23018_reset_loop;
 
-#ifdef DEBUG_MATRIX_SCAN_RATE
-uint32_t matrix_timer;
-uint32_t matrix_scan_count;
-#endif
-
-
 __attribute__ ((weak))
 void matrix_init_user(void) {}
 
@@ -143,10 +133,6 @@ void matrix_init(void)
         }
     }
 
-#ifdef DEBUG_MATRIX_SCAN_RATE
-    matrix_timer = timer_read32();
-    matrix_scan_count = 0;
-#endif
     matrix_init_quantum();
 }
 
@@ -160,12 +146,6 @@ void matrix_power_up(void) {
     for (uint8_t i=0; i < MATRIX_ROWS; i++) {
         matrix[i] = 0;
     }
-
-#ifdef DEBUG_MATRIX_SCAN_RATE
-    matrix_timer = timer_read32();
-    matrix_scan_count = 0;
-#endif
-
 }
 
 // Returns a matrix_row_t whose bits are set if the corresponding key should be
@@ -214,18 +194,6 @@ uint8_t matrix_scan(void)
       }
   }
 
-#ifdef DEBUG_MATRIX_SCAN_RATE
-    matrix_scan_count++;
-    uint32_t timer_now = timer_read32();
-    if (TIMER_DIFF_32(timer_now, matrix_timer)>1000) {
-        print("matrix scan frequency: ");
-        pdec(matrix_scan_count);
-        print("\n");
-
-        matrix_timer = timer_now;
-        matrix_scan_count = 0;
-    }
-#endif
     for (uint8_t i = 0; i < MATRIX_ROWS_PER_SIDE; i++) {
         select_row(i);
         // and select on left hand
@@ -245,8 +213,8 @@ uint8_t matrix_scan(void)
 
 #ifdef DEBUG_MATRIX
     for (uint8_t c = 0; c < MATRIX_COLS; c++)
-        for (uint8_t r = 0; r < MATRIX_ROWS; r++)
-          if (matrix_is_on(r, c)) xprintf("r:%d c:%d \n", r, c);
+		for (uint8_t r = 0; r < MATRIX_ROWS; r++)
+		  if (matrix_is_on(r, c)) xprintf("r:%d c:%d \n", r, c);
 #endif
 
     return 1;
@@ -322,9 +290,9 @@ static matrix_row_t read_cols(uint8_t row)
         }
     } else {
          /* read from teensy
-            * bitmask is 0b0111001, but we want the lower four
-            * we'll return 1s for the top two, but that's harmless.
-            */
+	        * bitmask is 0b0111001, but we want the lower four
+	        * we'll return 1s for the top two, but that's harmless.
+	        */
         // So I need to confuckulate all this
         //return ~(((PIND & DMASK) >> 1  | ((PINC & CMASK) >> 6) | (PIN)));
         //return ~((PINF & 0x03) | ((PINF & 0xF0) >> 2));
