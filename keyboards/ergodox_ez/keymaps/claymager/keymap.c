@@ -17,15 +17,11 @@
 #define _xx_ KC_NO
 #define _LT_ KC_TRANSPARENT
 
+#define KC_____ KC_TRANSPARENT
+#define KC_TO(x) TO(x)
+
 enum custom_keycodes {
   PLACEHOLDER = SAFE_RANGE, // can always be here
-  EPRM,
-  RGB_SLD,
-  BLUE,
-  GREEN,
-  ORANGE,
-  PURPLE,
-  RED
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -72,27 +68,37 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       KC_RCTRL,             LT(NAV,KC_TAB),         KC_SPACE
    ),
 
-  [NUMB] = LAYOUT_ergodox(
-      // left hand
-      ____,  ____,  ____,  ____,  ____,  ____,  ____,
-      ____,  ____,  KC_A,  KC_B,  KC_C,  ____,  ____,
-      _LT_,  ____,  KC_D,  KC_E,  KC_F,  ____,
-      ____,  ____,  ____,  ____,  ____,  ____,  ____,
-      ____,  ____,  ____,  ____,  ____,
-      ____,  ____,
-      ____,
-      ____,  TO(BASE),  ____,
-
-      // right hand
-      ____,  ____,     ____,  ____,    ____,      ____,      ____,
-      ____,  KC_COLN,  KC_1,  KC_2,    KC_3,    KC_DOT,    ____,
-             KC_0,     KC_4,  KC_5,    KC_6,    KC_MINUS,  ____,
-      ____,  ____,     KC_7,  KC_8,    KC_9,    KC_SLASH,  ____,
-                       ____,  KC_LPRN, KC_RPRN,  ____,      ____,
-      ____,  ____,
-      ____,
-      ____,  ____,  ____
+/*  ---------- LEFT HAND -----------   ---------- RIGHT HAND ---------- */
+  [NUMB] = LAYOUT_kc(
+     ____, ____, ____, ____, ____, ____, ____,            ____, ____, ____, ____, ____, ____, ____,
+     ____, ____,    A,    B,    C, ____, ____,            ____, COLN,    1,    2,    3,  DOT, ____,
+     ____, ____,    D,    E,    F, ____,                           0,    4,    5,    6,MINUS, ____,
+     ____, ____, ____, ____, ____, ____, ____,            ____, ____,    7,    8,    9,SLASH, ____,
+     ____, ____, ____, ____, ____,                                    ____, LPRN, RPRN, ____, ____,
+                                       ____, ____,    ____, ____,
+                                             ____,    ____,
+                                 ____,TO(0), ____,    ____, ____, ____
   ),
+
+       /* _____,   _____,   _____,   _____,   _____,   _____,   _____, */
+      /* ____,  ____,  KC_A,  KC_B,  KC_C,  ____,  ____, */
+      /* _LT_,  ____,  KC_D,  KC_E,  KC_F,  ____, */
+      /* ____,  ____,  ____,  ____,  ____,  ____,  ____, */
+      /* ____,  ____,  ____,  ____,  ____, */
+      /* ____,  ____, */
+      /* ____, */
+      /* ____,  TO(BASE),  ____, */
+
+      /* // right hand */
+      /* ____,  ____,     ____,  ____,    ____,      ____,      ____, */
+      /* ____,  KC_COLN,  KC_1,  KC_2,    KC_3,    KC_DOT,    ____, */
+      /*        KC_0,     KC_4,  KC_5,    KC_6,    KC_MINUS,  ____, */
+      /* ____,  ____,     KC_7,  KC_8,    KC_9,    KC_SLASH,  ____, */
+      /*                  ____,  KC_LPRN, KC_RPRN,  ____,      ____, */
+      /* ____,  ____, */
+      /* ____, */
+      /* ____,  ____,  ____ */
+  /* ), */
 
   [SYMB] = LAYOUT_ergodox(
 /* Keymap 2: Symbols
@@ -295,69 +301,7 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
     // dynamically generate these.
-    case EPRM:
-      if (record->event.pressed) {
-        eeconfig_init();
-      }
-      return false;
-      break;
-    case RGB_SLD:
-      if (record->event.pressed) {
-        rgblight_mode(1);
-      }
-      return false;
-      break;
-    case BLUE:
-      if (record->event.pressed) {
-        #ifdef RGBLIGHT_ENABLE
-          rgblight_enable();
-          rgblight_mode(1);
-          rgblight_sethsv(240,255,255);
-        #endif
-      }
-      return false;
-      break;
-    case GREEN:
-      if (record->event.pressed) {
-        #ifdef RGBLIGHT_ENABLE
-          rgblight_enable();
-          rgblight_mode(1);
-          rgblight_sethsv(120,255,128);
-        #endif
-      }
-      return false;
-      break;
-    case ORANGE:
-      if (record->event.pressed) {
-        #ifdef RGBLIGHT_ENABLE
-          rgblight_enable();
-          rgblight_mode(1);
-          rgblight_sethsv(38,255,255);
-        #endif
-      }
-      return false;
-      break;
-    case PURPLE:
-      if (record->event.pressed) {
-        #ifdef RGBLIGHT_ENABLE
-          rgblight_enable();
-          rgblight_mode(1);
-          rgblight_sethsv(255,255,128);
-        #endif
-      }
-      return false;
-      break;
-    case RED:
-      if (record->event.pressed) {
-        #ifdef RGBLIGHT_ENABLE
-          rgblight_enable();
-          rgblight_mode(1);
-          rgblight_sethsv(0,255,255);
-        #endif
-      }
-      return false;
-      break;
-  }
+    };
   return true;
 }
 
@@ -377,11 +321,11 @@ uint32_t layer_state_set_user(uint32_t state) {
         ergodox_right_led_2_on();
         break;
       case 3:
-        ergodox_right_led_3_on();
-        break;
-      case 4:
         ergodox_right_led_1_on();
         ergodox_right_led_2_on();
+        break;
+      case 4:
+        ergodox_right_led_3_on();
         break;
       case 5:
         ergodox_right_led_1_on();
