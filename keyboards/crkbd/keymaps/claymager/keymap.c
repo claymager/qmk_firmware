@@ -21,102 +21,98 @@ extern uint8_t is_master;
 // The underscores don't mean anything - you can have a layer called STUFF or any other name.
 // Layer names don't all need to be of the same length, obviously, and you can also skip them
 // entirely and just use numbers.
-#define QWERTY 0
+#define BASE 0
 #define NUMB 1
 #define SYMB 2
 #define META 3
 #define NAV  4
 
 enum combos {
-    L_TH, R_TH, QWFP
+    L_TH, R_TH, Super_Esc
 };
 
 const uint16_t PROGMEM esc_combo[] = {KC_ENT, KC_LSFT, COMBO_END};
 const uint16_t PROGMEM tab_combo[] = {KC_SPC, KC_LGUI, COMBO_END};
-const uint16_t PROGMEM qwfp_combo[] = {KC_Q, KC_W, KC_F, KC_P, COMBO_END};
+const uint16_t PROGMEM s_esc_combo[] = {KC_LGUI, KC_ENT, KC_LSFT, COMBO_END};
+
 
 combo_t key_combos[COMBO_COUNT] = {
     [L_TH] = COMBO(esc_combo, KC_ESC),
     [R_TH] = COMBO(tab_combo, KC_TAB),
-    [QWFP] = COMBO(qwfp_combo, RESET)
+    [Super_Esc] = COMBO(s_esc_combo, LGUI(KC_ESC)),
 };
 
 /* enum custom_keycodes { */
-/*   QWERTY = SAFE_RANGE, */
+/*   BASE = SAFE_RANGE, */
 /* }; */
 
 enum macro_keycodes {
   KC_SAMPLEMACRO,
 };
 
-#define KC______ KC_TRNS
-#define KC_XXXXX KC_NO
-#define KC_RESET   RESET
-#define KC_SYMB OSL(SYMB)
-#define KC_NUMB OSL(NUMB)
-#define KC_META OSL(META)
-#define KC_NAV_Z LT(NAV, KC_Z)
+#define _____ KC_TRNS
+#define XXXXX KC_NO
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-  [QWERTY] = LAYOUT_kc(
-  //,-----------------------------------------.                ,-----------------------------------------.
-       META,     Q,     W,     F,     P,     B,                      J,     L,     U,     Y,  SCLN,  RCTL,
-  //|------+------+------+------+------+------|                |------+------+------+------+------+------|
-       NUMB,     A,     R,     S,     T,     G,                      M,     N,     E,     I,     O,  SYMB,
-  //|------+------+------+------+------+------|                |------+------+------+------+------+------|
-       BSPC, NAV_Z,     X,     C,     D,     V,                      K,     H,  COMM,   DOT,  SLSH,   DEL,
-  //|------+------+------+------+------+------+------|  |------+------+------+------+------+------+------|
-                                    LALT,  ENT, LSFT,     SPC, LGUI, RALT
-                              //`--------------------'  `--------------------'
+  [BASE] = LAYOUT(
+  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+    OSL(META),    KC_Q,    KC_W,    KC_F,    KC_P,    KC_B,                         KC_J,    KC_L,    KC_U,    KC_Y, KC_SCLN, KC_RCTL,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+    OSL(NUMB),    KC_A,    KC_R,    KC_S,    KC_T,    KC_G,                         KC_M,    KC_N,    KC_E,    KC_I,    KC_O, OSL(SYMB),
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+   KC_BSPC, LT(NAV,KC_Z),  KC_X,    KC_C,    KC_D,    KC_V,                         KC_K,    KC_H, KC_COMM,  KC_DOT, KC_SLSH,  KC_DEL,
+  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+                                        KC_LALT,    KC_ENT, KC_LSFT,     KC_SPC, KC_LGUI, KC_RALT
+                                      //`--------------------------'  `--------------------------'
   ),
 
-  [NUMB] = LAYOUT_kc(
-  //,-----------------------------------------.                ,-----------------------------------------.
-      _____, _____,     A,     B,     C, _____,                   COLN,     1,     2,     3,   DOT, _____,
-  //|------+------+------+------+------+------|                |------+------+------+------+------+------|
-      _____, _____,     D,     E,     F, _____,                      0,     4,     5,     6, MINUS, _____,
-  //|------+------+------+------+------+------|                |------+------+------+------+------+------|
-      _____, _____, _____, _____, _____, _____,                  _____,     7,     8,     9,  SLSH, _____,
-  //|------+------+------+------+------+------+------|  |------+------+------+------+------+------+------|
-                                  _____, _____, _____,    _____, _____, _____
-                              //`--------------------'  `--------------------'
+  [NUMB] = LAYOUT(
+  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+     TO(BASE),   _____,    KC_A,    KC_B,    KC_C,   _____,                      KC_COLN,    KC_1,    KC_2,    KC_3,  KC_DOT,   _____,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+        _____,   _____,    KC_D,    KC_E,    KC_F,   _____,                         KC_0,    KC_4,    KC_5,    KC_6,KC_MINUS,   _____,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+        _____,   _____,   _____,   _____,   _____,   _____,                        _____,    KC_7,    KC_8,    KC_9, KC_SLSH,   _____,
+  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+                                           _____,   _____,   _____,      _____,   _____,   _____
+                                      //`--------------------------'  `--------------------------'
   ),
 
-  [SYMB] = LAYOUT_kc(
-  //,-----------------------------------------.                ,-----------------------------------------.
-      _____, GRAVE,  LBRC,  LCBR,  LPRN,  LABK,                   RABK,  RPRN,  RCBR,  RBRC,  SCLN, _____,
-  //|------+------+------+------+------+------|                |------+------+------+------+------+------|
-      _____,  TILD, MINUS, QUOTE,  COLN,  UNDS,                 BSLASH, EQUAL,  DQUO,  PLUS,  SCLN, _____,
-  //|------+------+------+------+------+------|                |------+------+------+------+------+------|
-      _____,  EXLM,    AT,  HASH,   DLR,  PERC,                   PIPE,  CIRC,  AMPR,  ASTR,  QUES, _____,
-  //|------+------+------+------+------+------+------|  |------+------+------+------+------+------+------|
-                                  _____, _____, _____,    _____, _____, _____
-                              //`--------------------'  `--------------------'
+  [SYMB] = LAYOUT(
+  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+     TO(BASE),KC_GRAVE, KC_LBRC, KC_LCBR, KC_LPRN, KC_LABK,                      KC_RABK, KC_RPRN, KC_RCBR, KC_RBRC, KC_SCLN,   _____,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+        _____, KC_TILD,KC_MINUS,KC_QUOTE, KC_COLN, KC_UNDS,                    KC_BSLASH,KC_EQUAL, KC_DQUO, KC_PLUS, KC_SCLN,   _____,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+        _____, KC_EXLM,   KC_AT, KC_HASH,  KC_DLR, KC_PERC,                      KC_PIPE, KC_CIRC, KC_AMPR, KC_ASTR, KC_QUES,   _____,
+  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+                                           _____,   _____,   _____,      _____,   _____,   _____
+                                      //`--------------------------'  `--------------------------'
   ),
 
 
-  [META] = LAYOUT_kc(
-  //,-----------------------------------------.                ,-----------------------------------------.
-      _____, XXXXX,   F10,   F11,   F12, XXXXX,                  XXXXX,    F1,    F2,    F3, XXXXX, RESET,
-  //|------+------+------+------+------+------|                |------+------+------+------+------+------|
-      _____, XXXXX,   F13,   F14,   F15, XXXXX,                    F10,    F4,    F5,    F6, XXXXX, _____,
-  //|------+------+------+------+------+------|                |------+------+------+------+------+------|
-      _____, XXXXX,   F16,   F17,   F18, XXXXX,                  XXXXX,    F7,    F8,    F9, XXXXX, _____,
-  //|------+------+------+------+------+------+------|  |------+------+------+------+------+------+------|
-                                  _____, _____, _____,    _____, _____, _____
-                              //`--------------------'  `--------------------'
+  [META] = LAYOUT(
+  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+        _____,   XXXXX,  KC_F10,  KC_F11,  KC_F12,   XXXXX,                        XXXXX,   KC_F1,   KC_F2,   KC_F3,   XXXXX,   RESET,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+     TO(NUMB),   XXXXX,  KC_F13,  KC_F14,  KC_F15,   XXXXX,                       KC_F10,   KC_F4,   KC_F5,   KC_F6,   XXXXX, TO(SYMB),
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+      TO(NAV), TO(NAV),  KC_F16,  KC_F17,  KC_F18,   XXXXX,                        XXXXX,   KC_F7,   KC_F8,   KC_F9,   XXXXX,   _____,
+  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+                                         _____,   _____, LSFT(KC_ESC),    _____,   _____,   _____
+                                      //`--------------------------'  `--------------------------'
   ),
 
-  [NAV] = LAYOUT_kc(
-  //,-----------------------------------------.                             ,-----------------------------------------.
-     XXXXX,      XXXXX, MS_WH_DOWN,   MS_UP, MS_WH_UP,       XXXXX,           XXXXX, PGDOWN,   UP,  PGUP, XXXXX, XXXXX,
-  //|------+------+------+------+------+------|                             |------+------+------+------+------+------|
-     XXXXX, MS_WH_LEFT,    MS_LEFT, MS_DOWN, MS_RIGHT, MS_WH_RIGHT,            HOME,  LEFT,  DOWN, RIGHT,   END, XXXXX,
-  //|------+------+------+------+------+------|                             |------+------+------+------+------+------|
-     XXXXX,      _____,    MS_BTN2, MS_BTN3,  MS_BTN1,       XXXXX,           XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,
-  //|------+------+------+------+------+------+------|                  |------+------+------+------+------+------+------|
-                                  _____, _____, _____,      _____, _____, _____
-                              //`--------------------'    `--------------------'
+  [NAV] = LAYOUT(
+  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+     TO(BASE),   XXXXX, KC_WH_D, KC_MS_U, KC_WH_U,   XXXXX,                        XXXXX, KC_PGDN,   KC_UP, KC_PGUP,   XXXXX,   XXXXX,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+        XXXXX, KC_WH_L, KC_MS_L, KC_MS_D, KC_MS_R, KC_WH_R,                      KC_HOME, KC_LEFT, KC_DOWN,KC_RIGHT,  KC_END,   XXXXX,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+        XXXXX,   _____, KC_BTN2, KC_BTN3, KC_BTN1,   XXXXX,                        XXXXX,   XXXXX,   XXXXX,   XXXXX,   XXXXX,   XXXXX,
+  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+                                           _____,   _____,   _____,        _____,   _____,   _____
+                                      //`--------------------------'  `--------------------------'
   )
 };
 
@@ -147,7 +143,38 @@ void matrix_init_user(void) {
 #ifdef SSD1306OLED
 
 // When add source files to SRC in rules.mk, you can use functions.
-const char *read_layer_state(void);
+/* const char *read_layer_state(void); */
+const char *read_layer_state(void) {
+  static char layer_state_str[24];
+  char layer_name[17];
+
+  switch (biton32(layer_state)) {
+    case BASE:
+      strcpy(layer_name, "Default");
+      break;
+    case NUMB:
+      strcpy(layer_name, "Numbers");
+      break;
+    case SYMB:
+      strcpy(layer_name, "Symbols");
+      break;
+    case META:
+      strcpy(layer_name, "Meta");
+      break;
+    case NAV:
+      strcpy(layer_name, "Navigation");
+      break;
+    default:
+      snprintf(layer_name, sizeof(layer_name), "Undef-%ld", layer_state);
+  }
+
+  strcpy(layer_state_str, "Layer: ");
+
+  strcat(layer_state_str, layer_name);
+  strcat(layer_state_str, "");
+  return layer_state_str;
+}
+
 const char *read_logo(void);
 void set_keylog(uint16_t keycode, keyrecord_t *record);
 const char *read_keylog(void);
@@ -170,7 +197,7 @@ void matrix_render_user(struct CharacterMatrix *matrix) {
     /* matrix_write_ln(matrix, read_keylogs()); */
     /* matrix_write_ln(matrix, read_mode_icon(keymap_config.swap_lalt_lgui)); */
     //matrix_write_ln(matrix, read_host_led_state());
-    matrix_write_ln(matrix, read_timelog());
+    /* matrix_write_ln(matrix, read_timelog()); */
   } else {
     matrix_write(matrix, read_logo());
   }
@@ -198,6 +225,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 #endif
     set_timelog();
   }
+
 
   return true;
 }
